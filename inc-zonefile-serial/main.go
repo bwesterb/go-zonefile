@@ -37,7 +37,7 @@ func main() {
 		}
 		vs := e.Values()
 		if len(vs) != 7 {
-			fmt.Println("Wrong number of parametesr to SOA line")
+			fmt.Println("Wrong number of parameters to SOA line")
 			os.Exit(4)
 		}
 		serial, err := strconv.Atoi(string(vs[2]))
