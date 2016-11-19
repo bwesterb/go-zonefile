@@ -1,0 +1,5 @@
+langauge: go
+
+go:
+    - 1.7
+    - master
