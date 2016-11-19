@@ -4,6 +4,8 @@ Go package to edit DNS/Bind zone files (preserving formatting & comments)
 `go-zonefile` is not finished: interfaces, documentation and convenience functions are missing.
 All the lexing and parsing is finished, though.
 
+**[Online documentation and examples](https://godoc.org/github.com/bwesterb/go-zonefile)**
+
 Bundled as an example (and actually the original reason why I wrote this package)
 is the `inc-zonefile-serial` utility, which increments the serial in a zonefile:
 
