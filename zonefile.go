@@ -28,6 +28,15 @@ func (z Zonefile) String() string {
 // Represents an entry in the zonefile
 type Entry entry
 
+// For a control entry, returns its command (e.g. $TTL, $ORIGIN, ...)
+func (e Entry) Command() []byte {
+	is := e.find(useControl)
+	if len(is) == 0 {
+		return nil
+	}
+	return e.tokens[is[0]].t.Value()
+}
+
 // The domain specified for the entry.
 func (e Entry) Domain() []byte {
 	is := e.find(useDomain)
@@ -56,11 +65,11 @@ func (e Entry) Type() []byte {
 }
 
 func (e Entry) String() string {
-	var buf bytes.Buffer
-	for _, tt := range e.tokens {
-		buf.Write(tt.t.val)
+	if e.isControl {
+		return fmt.Sprintf("<Entry cmd=%q %q>", e.Command(), e.Values())
 	}
-	return buf.String()
+	return fmt.Sprintf("<Entry dom=%q cls=%q typ=%q %q>",
+		e.Domain(), e.Class(), e.Type(), e.Values())
 }
 
 // The TTL specified for the entry
@@ -148,6 +157,34 @@ func (z *Zonefile) Save() []byte {
 	return buf.Bytes()
 }
 
+// Create a new entry from a bytestring
+func ParseEntry(data []byte) (e Entry, err ParsingError) {
+	l := lex(data)
+	var tokens []token
+	itemsFound := 0
+
+	for {
+		t := <-l.tokens
+		if t.typ == tokenEOF {
+			break
+		}
+		if t.typ == tokenError {
+			err = newParsingError(string(t.val), t)
+			return
+		}
+		tokens = append(tokens, t)
+		if t.IsItem() {
+			itemsFound++
+		}
+		if t.typ == tokenNewline && itemsFound > 0 {
+			err = newParsingError("Multiple entries in string", t)
+			return
+		}
+	}
+
+	return parseLine(tokens)
+}
+
 // Parse bytestring containing a zonefile
 func Load(data []byte) (r *Zonefile, e ParsingError) {
 	r = &Zonefile{}
@@ -196,7 +233,8 @@ func Load(data []byte) (r *Zonefile, e ParsingError) {
 //
 
 type entry struct {
-	tokens []taggedToken
+	tokens    []taggedToken
+	isControl bool // is this a control ($INCLUDE, $TTL, ...) entry?
 }
 
 // The interesting tokens in each line are tagged by their kind so
@@ -258,6 +296,7 @@ func parseLine(line []token) (e Entry, err ParsingError) {
 		bytes.Equal(e.tokens[iFirstItem].t.Value(), []byte("$ORIGIN")) ||
 		bytes.Equal(e.tokens[iFirstItem].t.Value(), []byte("$TTL")) {
 		e.tokens[iFirstItem].u = useControl
+		e.isControl = true
 		for i := iFirstItem + 1; i < len(e.tokens); i++ {
 			if e.tokens[i].t.IsItem() {
 				e.tokens[i].u = useValue

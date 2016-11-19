@@ -40,6 +40,16 @@ func ExampleLoad() {
 	// Output: <Zonefile with 3 entries>
 }
 
+func ExampleParseEntry() {
+	entry, err := zonefile.ParseEntry([]byte(" IN MX 100 alpha.example.com."))
+	if err != nil {
+		fmt.Println("Parsing error", err, "on line", err.LineNo())
+		return
+	}
+	fmt.Println(entry)
+	// Output: <Entry dom="" cls="IN" typ="MX" ["100" "alpha.example.com."]>
+}
+
 var tests = [...]string{`$ORIGIN MYDOMAIN.COM.
 $TTL 3600
 @	IN	SOA	NS1.NAMESERVER.NET.	HOSTMASTER.MYDOMAIN.COM.	(
