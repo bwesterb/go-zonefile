@@ -1,24 +1,16 @@
-package zonefile
+package zonefile_test
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/bwesterb/go-zonefile"
 	"testing"
 )
-
-func getAllToken(l *lexer) (ret []token) {
-	var t token
-	for t.typ != tokenEOF {
-		t = <-l.tokens
-		ret = append(ret, t)
-	}
-	return
-}
 
 // Loading and saving a zonefile shouldn't do anything
 func TestLoadThenSave(t *testing.T) {
 	for i, test := range tests {
-		z, e := Load([]byte(test))
+		z, e := zonefile.Load([]byte(test))
 		if e != nil {
 			t.Fatal(i, "error loading:", e.LineNo(), e)
 		}
@@ -28,23 +20,25 @@ func TestLoadThenSave(t *testing.T) {
 	}
 }
 
-func TestLoad(t *testing.T) {
-	for i, test := range tests {
-		z, e := Load([]byte(test))
-		if e != nil {
-			t.Fatal(i, "error loading:", e.LineNo(), e)
-		}
-		fmt.Println(z.Entries())
+func ExampleLoad() {
+	zf, err := zonefile.Load([]byte(
+		"@	IN	SOA	NS1.NAMESERVER.NET.	HOSTMASTER.MYDOMAIN.COM.	(\n" +
+			"            1406291485	 ;serial\n" +
+			"            3600	 ;refresh\n" +
+			"            600	 ;retry\n" +
+			"            604800	 ;expire\n" +
+			"            86400	 ;minimum ttl\n" +
+			")\n" +
+			"\n" +
+			"@	NS	NS1.NAMESERVER.NET.\n" +
+			"@	NS	NS2.NAMESERVER.NET.\n"))
+	if err != nil {
+		fmt.Println("Parsing error", err, "on line", err.LineNo())
+		return
 	}
+	fmt.Println(zf)
+	// Output: <Zonefile with 3 entries>
 }
-
-//
-// func TestLex(t *testing.T) {
-// 	for _, test := range(tests) {
-//         l := lex([]byte(test))
-//         fmt.Println(getAllToken(l))
-// 	}
-// }
 
 var tests = [...]string{`$ORIGIN MYDOMAIN.COM.
 $TTL 3600

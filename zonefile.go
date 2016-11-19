@@ -21,6 +21,10 @@ type Zonefile struct {
 	suffix  []token
 }
 
+func (z Zonefile) String() string {
+	return fmt.Sprintf("<Zonefile with %v entries>", len(z.entries))
+}
+
 // Represents an entry in the zonefile
 type Entry entry
 
