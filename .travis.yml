@@ -1,5 +1,8 @@
-langauge: go
-
+language: go
+sudo: false
 go:
     - 1.7
-    - master
+    - release
+script:
+    - go vet
+    - go test
