@@ -393,7 +393,6 @@ func (t token) Value() []byte {
 			if e2 != nil || e3 != nil || '0' > c2 || '0' > c3 ||
 				'9' < c2 || '9' < c3 {
 				panic("malformed value")
-				continue
 			}
 			v, _ := strconv.Atoi(string([]byte{c, c2, c3}))
 			obuf.WriteByte(byte(v))
