@@ -61,6 +61,17 @@ func ExampleZonefile_AddEntry() {
 	// Output: <Zonefile [<Entry dom="irc" cls="IN" typ="A" ["1.2.3.4"]>]>
 }
 
+func ExampleZonefile_Save() {
+	z := zonefile.New()
+	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))
+	z.AddEntry(entry)
+	entry, _ = zonefile.ParseEntry([]byte("www IN A 2.1.4.3"))
+	z.AddEntry(entry)
+	fmt.Println(string(z.Save()))
+	// Output: irc IN A 1.2.3.4
+	// www IN A 2.1.4.3
+}
+
 var tests = [...]string{`$ORIGIN MYDOMAIN.COM.
 $TTL 3600
 @	IN	SOA	NS1.NAMESERVER.NET.	HOSTMASTER.MYDOMAIN.COM.	(
