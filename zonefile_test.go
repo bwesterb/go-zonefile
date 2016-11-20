@@ -53,7 +53,7 @@ func ExampleParseEntry() {
 	// Output: <Entry dom="" cls="IN" typ="MX" ["100" "alpha.example.com."]>
 }
 
-func ExampleAddEntry() {
+func ExampleZonefile_AddEntry() {
 	z := zonefile.New()
 	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))
 	z.AddEntry(entry)
