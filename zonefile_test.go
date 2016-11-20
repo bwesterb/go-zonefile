@@ -53,6 +53,15 @@ func ExampleParseEntry() {
 	// Output: <Entry dom="" cls="IN" typ="MX" ["100" "alpha.example.com."]>
 }
 
+func ExampleZonefile_AddA() {
+	z := zonefile.New()
+	z.AddA("", "3.2.3.2")
+	z.AddA("www", "1.2.3.4")
+	z.AddA("irc", "2.2.2.2")
+	fmt.Println(z)
+	// Output: <Zonefile [<Entry dom="" cls="" typ="" ["3.2.3.2"]> <Entry dom="www" cls="" typ="" ["1.2.3.4"]> <Entry dom="irc" cls="" typ="" ["2.2.2.2"]>]>
+}
+
 func ExampleZonefile_AddEntry() {
 	z := zonefile.New()
 	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))

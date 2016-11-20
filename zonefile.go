@@ -92,7 +92,7 @@ func (e Entry) Values() (ret [][]byte) {
 }
 
 // Set the the ith value of the entry
-func (e Entry) SetValue(i int, v []byte) error {
+func (e *Entry) SetValue(i int, v []byte) error {
 	if len(v) == 0 {
 		return errors.New("value must be non-empty")
 	}
@@ -104,6 +104,32 @@ func (e Entry) SetValue(i int, v []byte) error {
 	return nil
 }
 
+// Changes the domain in the entry
+func (e *Entry) SetDomain(v []byte) error {
+	if e.isControl {
+		return errors.New("control entry does not have a domain")
+	}
+	is := e.find(useDomain)
+
+	// If there is a domain item, simply change its value
+	if len(is) == 1 {
+		e.tokens[is[0]].t.SetValue(v)
+		return nil
+	}
+
+	// If there no domain is specified, add it.
+	iFirstToken := e.startOfLine()
+	var tDomain = tttDomain
+	tDomain.t.SetValue(v)
+	toAdd := []taggedToken{tDomain}
+	if e.tokens[iFirstToken].t.typ != tokenWhiteSpace {
+		toAdd = append(toAdd, tttSpace)
+	}
+	e.tokens = append(e.tokens[:iFirstToken], append(toAdd,
+		e.tokens[iFirstToken:]...)...)
+	return nil
+}
+
 // Find all indices of tokens with the given use
 func (e Entry) find(use tokenUse) (is []int) {
 	for i := 0; i < len(e.tokens); i++ {
@@ -112,6 +138,24 @@ func (e Entry) find(use tokenUse) (is []int) {
 		}
 	}
 	return
+}
+
+// Find the first token on the main line of the entry
+func (e Entry) startOfLine() (r int) {
+	var firstItem int
+	for i := 0; i < len(e.tokens); i++ {
+		if e.tokens[i].t.IsItem() {
+			firstItem = i
+			break
+		}
+	}
+	for i := firstItem; i >= 0; i-- {
+		if e.tokens[i].t.typ == tokenNewline {
+			r = i + 1
+			return
+		}
+	}
+	return 0
 }
 
 type ParsingError interface {
@@ -141,8 +185,17 @@ func (z *Zonefile) Entries() (r []Entry) {
 	return z.entries
 }
 
+// Add an A entry to the zonefile
+func (z *Zonefile) AddA(domain string, val string) *Entry {
+	var e Entry
+	e.tokens = []taggedToken{tttDomain, tttSpace, tttValue}
+	e.SetDomain([]byte(domain))
+	e.SetValue(0, []byte(val))
+	return z.AddEntry(e)
+}
+
 // Add an entry to the zonefile
-func (z *Zonefile) AddEntry(e Entry) {
+func (z *Zonefile) AddEntry(e Entry) *Entry {
 	// Prefix suffix to entry
 	var taggedSuffix []taggedToken
 	for _, t := range z.suffix {
@@ -158,6 +211,7 @@ func (z *Zonefile) AddEntry(e Entry) {
 	e.tokens = append(taggedSuffix, e.tokens...)
 	z.suffix = []token{}
 	z.entries = append(z.entries, e)
+	return &z.entries[len(z.entries)-1]
 }
 
 // Write the zonefile to a bytearray
@@ -284,6 +338,18 @@ const (
 // tagged token template newline
 var tttNewline taggedToken = taggedToken{
 	token{val: []byte{'\n'}, typ: tokenNewline}, useOther}
+
+// tagged token template space
+var tttSpace taggedToken = taggedToken{
+	token{val: []byte{' '}, typ: tokenWhiteSpace}, useOther}
+
+// tagged token template domain
+var tttDomain taggedToken = taggedToken{
+	token{val: []byte{'.'}, typ: tokenItem}, useDomain}
+
+// tagged token template value
+var tttValue taggedToken = taggedToken{
+	token{val: []byte{'.'}, typ: tokenItem}, useValue}
 
 func newParsingError(msg string, where token) ParsingError {
 	var ret parsingError
