@@ -7,6 +7,9 @@ import (
 	"testing"
 )
 
+// XXX more tests for AddEntry.
+// XXX test Value() and SetValue()
+
 // Loading and saving a zonefile shouldn't do anything
 func TestLoadThenSave(t *testing.T) {
 	for i, test := range tests {
@@ -36,8 +39,8 @@ func ExampleLoad() {
 		fmt.Println("Parsing error", err, "on line", err.LineNo())
 		return
 	}
-	fmt.Println(zf)
-	// Output: <Zonefile with 3 entries>
+	fmt.Println(len(zf.Entries()))
+	// Output: 3
 }
 
 func ExampleParseEntry() {
@@ -48,6 +51,14 @@ func ExampleParseEntry() {
 	}
 	fmt.Println(entry)
 	// Output: <Entry dom="" cls="IN" typ="MX" ["100" "alpha.example.com."]>
+}
+
+func ExampleAddEntry() {
+	z := zonefile.New()
+	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))
+	z.AddEntry(entry)
+	fmt.Println(z)
+	// Output: <Zonefile [<Entry dom="irc" cls="IN" typ="A" ["1.2.3.4"]>]>
 }
 
 var tests = [...]string{`$ORIGIN MYDOMAIN.COM.

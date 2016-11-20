@@ -22,7 +22,7 @@ type Zonefile struct {
 }
 
 func (z Zonefile) String() string {
-	return fmt.Sprintf("<Zonefile with %v entries>", len(z.entries))
+	return fmt.Sprintf("<Zonefile %v>", z.entries)
 }
 
 // Represents an entry in the zonefile
@@ -141,6 +141,25 @@ func (z *Zonefile) Entries() (r []Entry) {
 	return z.entries
 }
 
+// Add an entry to the zonefile
+func (z *Zonefile) AddEntry(e Entry) {
+	// Prefix suffix to entry
+	var taggedSuffix []taggedToken
+	for _, t := range z.suffix {
+		var use tokenUse
+		if t.typ == tokenComment {
+			use = useComment
+		}
+		taggedSuffix = append(taggedSuffix, taggedToken{t, use})
+	}
+	if !z.endsOnNewline() {
+		taggedSuffix = append(taggedSuffix, tttNewline)
+	}
+	e.tokens = append(taggedSuffix, e.tokens...)
+	z.suffix = []token{}
+	z.entries = append(z.entries, e)
+}
+
 // Write the zonefile to a bytearray
 func (z *Zonefile) Save() []byte {
 	var buf bytes.Buffer
@@ -183,6 +202,11 @@ func ParseEntry(data []byte) (e Entry, err ParsingError) {
 	}
 
 	return parseLine(tokens)
+}
+
+// Create a new empty zonefile
+func New() (z *Zonefile) {
+	return &Zonefile{}
 }
 
 // Parse bytestring containing a zonefile
@@ -256,6 +280,10 @@ const (
 	useValue
 	useControl
 )
+
+// tagged token template newline
+var tttNewline taggedToken = taggedToken{
+	token{val: []byte{'\n'}, typ: tokenNewline}, useOther}
 
 func newParsingError(msg string, where token) ParsingError {
 	var ret parsingError
@@ -379,6 +407,25 @@ func parseLine(line []token) (e Entry, err ParsingError) {
 	}
 
 	return
+}
+
+// Checks whether we simply append a new item or need to add a newline first
+func (z *Zonefile) endsOnNewline() bool {
+	if len(z.suffix) > 0 {
+		if z.suffix[len(z.suffix)-1].typ == tokenNewline {
+			return true
+		}
+		return false
+	}
+	if len(z.entries) == 0 {
+		return true
+	}
+	return z.entries[len(z.entries)-1].endsOnNewline()
+}
+
+// Checks whether the entry ends on a newline
+func (e Entry) endsOnNewline() bool {
+	return e.tokens[len(e.tokens)-1].t.typ == tokenNewline
 }
 
 func (t token) IsItem() bool {
@@ -537,7 +584,11 @@ func (l *lexer) run() {
 }
 
 func (l *lexer) emit(t tokenType) {
-	l.tokens <- token{typ: t, val: l.buf[l.start:l.pos],
+	var val []byte
+	if t != tokenEOF {
+		val = l.buf[l.start:l.pos]
+	}
+	l.tokens <- token{typ: t, val: val,
 		lineno: l.lineno, colno: l.colno}
 	l.start = l.pos
 }
