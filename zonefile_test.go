@@ -131,6 +131,54 @@ func ExampleZonefile_Save() {
 	// www IN A 2.1.4.3
 }
 
+func ExampleZonefile_SetValue() {
+	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))
+	fmt.Println(entry)
+	entry.SetValue(0, []byte("4.3.2.1"))
+	fmt.Println(entry)
+	// Output: <Entry dom="irc" ttl="" cls="IN" typ="A" ["1.2.3.4"]>
+	// <Entry dom="irc" ttl="" cls="IN" typ="A" ["4.3.2.1"]>
+}
+
+func ExampleZonefile_RemoveTTL() {
+	entry, _ := zonefile.ParseEntry([]byte("irc 12 IN A 1.2.3.4"))
+	fmt.Println(entry)
+	entry.RemoveTTL()
+	fmt.Println(entry)
+	// Output: <Entry dom="irc" ttl="12" cls="IN" typ="A" ["1.2.3.4"]>
+	// <Entry dom="irc" ttl="" cls="IN" typ="A" ["1.2.3.4"]>
+}
+
+func ExampleZonefile_SetTTL() {
+	entry, _ := zonefile.ParseEntry([]byte("irc 12 IN A 1.2.3.4"))
+	fmt.Println(entry)
+	entry.SetTTL(14)
+	fmt.Println(entry)
+	// Output: <Entry dom="irc" ttl="12" cls="IN" typ="A" ["1.2.3.4"]>
+	// <Entry dom="irc" ttl="14" cls="IN" typ="A" ["1.2.3.4"]>
+}
+
+func ExampleZonefile_Domain() {
+	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))
+	fmt.Printf("%q\n", entry.Domain())
+	entry, _ = zonefile.ParseEntry([]byte(" IN A 4.3.2.1"))
+	fmt.Printf("%q\n", entry.Domain())
+	// Output: "irc"
+	// ""
+}
+
+func ExampleZonefile_SetDomain() {
+	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))
+	fmt.Println(entry)
+	entry.SetDomain([]byte(""))
+	fmt.Println(entry)
+	entry.SetDomain([]byte("chat"))
+	fmt.Println(entry)
+	// Output: <Entry dom="irc" ttl="" cls="IN" typ="A" ["1.2.3.4"]>
+	// <Entry dom="" ttl="" cls="IN" typ="A" ["1.2.3.4"]>
+	// <Entry dom="chat" ttl="" cls="IN" typ="A" ["1.2.3.4"]>
+}
+
 var tests = [...]string{`$ORIGIN MYDOMAIN.COM.
 $TTL 3600
 @	IN	SOA	NS1.NAMESERVER.NET.	HOSTMASTER.MYDOMAIN.COM.	(
