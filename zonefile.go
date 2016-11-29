@@ -141,10 +141,49 @@ func (e *Entry) SetDomain(v []byte) error {
 }
 
 // Change the class in the entry
+func (e *Entry) SetTTL(v int) error {
+	if e.isControl {
+		return errors.New("control entry does not have a TTL")
+	}
+
+	is := e.find(useTTL)
+
+	if len(is) == 1 {
+		e.tokens[is[0]].t.SetValue([]byte(strconv.Itoa(v)))
+		return nil
+	}
+
+	// If there is no TTL item in the entry, add it
+	tTTL := tttTTL
+	tTTL.t.SetValue([]byte(strconv.Itoa(v)))
+	return e.addAfterDomain(tTTL)
+}
+
+// Remove the TTL from the entry, if there is any
+func (e *Entry) RemoveTTL() error {
+	if e.isControl {
+		return errors.New("control entry does not have a TTL")
+	}
+
+	is := e.find(useTTL)
+
+	if len(is) == 0 {
+		return nil
+	}
+
+	e.tokens = append(e.tokens[:is[0]], e.tokens[is[0]+1:]...)
+	return nil
+}
+
+// Change the class in the entry
 func (e *Entry) SetClass(v []byte) error {
 	if e.isControl {
 		return errors.New("control entry does not have a class")
 	}
+	if len(v) != 0 && !dns_classes_lut[string(v)] {
+		return errors.New("invalid dns class")
+	}
+
 	is := e.find(useClass)
 
 	if len(is) == 1 {
@@ -175,9 +214,9 @@ func (e *Entry) addAfterDomain(t taggedToken) error {
 	// If there is no domain item in the entry, add it at the start of the line
 	domainIs := e.find(useDomain)
 	if len(domainIs) == 1 {
-		e.tokens = append(e.tokens[:domainIs[0]],
+		e.tokens = append(e.tokens[:domainIs[0]+1],
 			append([]taggedToken{tttSpace, t},
-				e.tokens[domainIs[0]:]...)...)
+				e.tokens[domainIs[0]+1:]...)...)
 		return nil
 	}
 
@@ -414,6 +453,10 @@ var tttDomain taggedToken = taggedToken{
 // tagged token template class
 var tttClass taggedToken = taggedToken{
 	token{val: []byte{'.'}, typ: tokenItem}, useClass}
+
+// tagged token template TTL
+var tttTTL taggedToken = taggedToken{
+	token{val: []byte{'.'}, typ: tokenItem}, useTTL}
 
 // tagged token template value
 var tttValue taggedToken = taggedToken{

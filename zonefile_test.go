@@ -56,6 +56,21 @@ func TestSetAttributes(t *testing.T) {
 	if !bytes.Equal(zf.Save(), []byte("test4  A 1.2.3.4")) {
 		t.Fatal("Setting class failed")
 	}
+	zf.Entries()[0].SetTTL(12)
+	if !bytes.Equal(zf.Save(), []byte("test4 12  A 1.2.3.4")) {
+		t.Fatal("Setting class failed")
+	}
+	zf.Entries()[0].SetTTL(14)
+	if !bytes.Equal(zf.Save(), []byte("test4 14  A 1.2.3.4")) {
+		t.Fatal("Setting class failed")
+	}
+	if *zf.Entries()[0].TTL() != 14 {
+		t.Fatal("TTL wasn't properly set")
+	}
+	zf.Entries()[0].RemoveTTL()
+	if !bytes.Equal(zf.Save(), []byte("test4   A 1.2.3.4")) {
+		t.Fatal("Setting class failed")
+	}
 }
 
 func ExampleLoad() {
