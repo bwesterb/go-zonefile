@@ -111,13 +111,23 @@ func (e *Entry) SetDomain(v []byte) error {
 	}
 	is := e.find(useDomain)
 
-	// If there is a domain item, simply change its value
 	if len(is) == 1 {
-		e.tokens[is[0]].t.SetValue(v)
+		// If there is a domain item, simply change its value
+		if len(v) != 0 {
+			e.tokens[is[0]].t.SetValue(v)
+			return nil
+		}
+
+		//  ... or delete it if we don't want a domain
+		e.tokens = append(e.tokens[:is[0]], e.tokens[is[0]+1:]...)
+	}
+
+	// There is no domain and we don't want one, so that's ok!
+	if len(v) == 0 {
 		return nil
 	}
 
-	// If there no domain is specified, add it.
+	// If there is no domain item in the entry, add it
 	iFirstToken := e.startOfLine()
 	var tDomain = tttDomain
 	tDomain.t.SetValue(v)
@@ -127,6 +137,58 @@ func (e *Entry) SetDomain(v []byte) error {
 	}
 	e.tokens = append(e.tokens[:iFirstToken], append(toAdd,
 		e.tokens[iFirstToken:]...)...)
+	return nil
+}
+
+// Change the class in the entry
+func (e *Entry) SetClass(v []byte) error {
+	if e.isControl {
+		return errors.New("control entry does not have a class")
+	}
+	is := e.find(useClass)
+
+	if len(is) == 1 {
+		// If there is a class item, simply change its value
+		if len(v) != 0 {
+			e.tokens[is[0]].t.SetValue(v)
+			return nil
+		}
+
+		//  ... or delete it if we don't want a class
+		e.tokens = append(e.tokens[:is[0]], e.tokens[is[0]+1:]...)
+	}
+
+	// There is no class and we don't want one, so that's ok
+	if len(v) == 0 {
+		return nil
+	}
+
+	// If there is no class item in the entry, add it
+	tClass := tttClass
+	tClass.t.SetValue(v)
+	return e.addAfterDomain(tClass)
+}
+
+// Adds a new item taggedToken into the entry after the domain (if it's there)
+// and otherwise at the start of the line.
+func (e *Entry) addAfterDomain(t taggedToken) error {
+	// If there is no domain item in the entry, add it at the start of the line
+	domainIs := e.find(useDomain)
+	if len(domainIs) == 1 {
+		e.tokens = append(e.tokens[:domainIs[0]],
+			append([]taggedToken{tttSpace, t},
+				e.tokens[domainIs[0]:]...)...)
+		return nil
+	}
+
+	// There is no domain entry.  Add class to the start of the line.
+	iFirstToken := e.startOfLine()
+	toAdd := []taggedToken{t}
+	if e.tokens[iFirstToken].t.typ != tokenWhiteSpace {
+		toAdd = append([]taggedToken{tttSpace}, toAdd...)
+	}
+	e.tokens = append(e.tokens[:iFirstToken+1], append(toAdd,
+		e.tokens[iFirstToken+1:]...)...)
 	return nil
 }
 
@@ -188,8 +250,10 @@ func (z *Zonefile) Entries() (r []Entry) {
 // Add an A entry to the zonefile
 func (z *Zonefile) AddA(domain string, val string) *Entry {
 	var e Entry
-	e.tokens = []taggedToken{tttDomain, tttSpace, tttValue}
-	e.SetDomain([]byte(domain))
+	e.tokens = []taggedToken{tttSpace, tttValue}
+	if len(domain) != 0 {
+		e.SetDomain([]byte(domain))
+	}
 	e.SetValue(0, []byte(val))
 	return z.AddEntry(e)
 }
@@ -346,6 +410,10 @@ var tttSpace taggedToken = taggedToken{
 // tagged token template domain
 var tttDomain taggedToken = taggedToken{
 	token{val: []byte{'.'}, typ: tokenItem}, useDomain}
+
+// tagged token template class
+var tttClass taggedToken = taggedToken{
+	token{val: []byte{'.'}, typ: tokenItem}, useClass}
 
 // tagged token template value
 var tttValue taggedToken = taggedToken{

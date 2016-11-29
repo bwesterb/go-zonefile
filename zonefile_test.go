@@ -23,6 +23,41 @@ func TestLoadThenSave(t *testing.T) {
 	}
 }
 
+func TestSetAttributes(t *testing.T) {
+	zf, err := zonefile.Load([]byte(" IN A 1.2.3.4"))
+	if err != nil {
+		t.Fatal("Couldn't parse simple zonefile")
+	}
+	zf.Entries()[0].SetDomain([]byte("test"))
+	if !bytes.Equal(zf.Save(), []byte("test IN A 1.2.3.4")) {
+		t.Fatal("Setting domain failed")
+	}
+	zf.Entries()[0].SetDomain([]byte("test2"))
+	if !bytes.Equal(zf.Save(), []byte("test2 IN A 1.2.3.4")) {
+		t.Fatal("Setting domain failed")
+	}
+	zf.Entries()[0].SetDomain([]byte(""))
+	if !bytes.Equal(zf.Save(), []byte(" IN A 1.2.3.4")) {
+		t.Fatal("Setting domain failed")
+	}
+	zf.Entries()[0].SetClass([]byte(""))
+	if !bytes.Equal(zf.Save(), []byte("  A 1.2.3.4")) {
+		t.Fatal("Setting class failed")
+	}
+	zf.Entries()[0].SetClass([]byte("IN"))
+	if !bytes.Equal(zf.Save(), []byte(" IN A 1.2.3.4")) {
+		t.Fatal("Setting class failed")
+	}
+	zf.Entries()[0].SetDomain([]byte("test4"))
+	if !bytes.Equal(zf.Save(), []byte("test4 IN A 1.2.3.4")) {
+		t.Fatal("Setting class failed")
+	}
+	zf.Entries()[0].SetClass([]byte(""))
+	if !bytes.Equal(zf.Save(), []byte("test4  A 1.2.3.4")) {
+		t.Fatal("Setting class failed")
+	}
+}
+
 func ExampleLoad() {
 	zf, err := zonefile.Load([]byte(
 		"@	IN	SOA	NS1.NAMESERVER.NET.	HOSTMASTER.MYDOMAIN.COM.	(\n" +
