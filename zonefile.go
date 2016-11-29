@@ -68,8 +68,14 @@ func (e Entry) String() string {
 	if e.isControl {
 		return fmt.Sprintf("<Entry cmd=%q %q>", e.Command(), e.Values())
 	}
-	return fmt.Sprintf("<Entry dom=%q cls=%q typ=%q %q>",
-		e.Domain(), e.Class(), e.Type(), e.Values())
+	var sTTL string
+	if e.TTL() == nil {
+		sTTL = ""
+	} else {
+		sTTL = strconv.Itoa(*e.TTL())
+	}
+	return fmt.Sprintf("<Entry dom=%q ttl=%q cls=%q typ=%q %q>",
+		e.Domain(), sTTL, e.Class(), e.Type(), e.Values())
 }
 
 // The TTL specified for the entry
