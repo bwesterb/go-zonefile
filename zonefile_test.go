@@ -131,7 +131,7 @@ func ExampleZonefile_Save() {
 	// www IN A 2.1.4.3
 }
 
-func ExampleZonefile_SetValue() {
+func ExampleEntry_SetValue() {
 	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))
 	fmt.Println(entry)
 	entry.SetValue(0, []byte("4.3.2.1"))
@@ -140,7 +140,7 @@ func ExampleZonefile_SetValue() {
 	// <Entry dom="irc" ttl="" cls="IN" typ="A" ["4.3.2.1"]>
 }
 
-func ExampleZonefile_RemoveTTL() {
+func ExampleEntry_RemoveTTL() {
 	entry, _ := zonefile.ParseEntry([]byte("irc 12 IN A 1.2.3.4"))
 	fmt.Println(entry)
 	entry.RemoveTTL()
@@ -149,7 +149,7 @@ func ExampleZonefile_RemoveTTL() {
 	// <Entry dom="irc" ttl="" cls="IN" typ="A" ["1.2.3.4"]>
 }
 
-func ExampleZonefile_SetTTL() {
+func ExampleEntry_SetTTL() {
 	entry, _ := zonefile.ParseEntry([]byte("irc 12 IN A 1.2.3.4"))
 	fmt.Println(entry)
 	entry.SetTTL(14)
@@ -158,7 +158,7 @@ func ExampleZonefile_SetTTL() {
 	// <Entry dom="irc" ttl="14" cls="IN" typ="A" ["1.2.3.4"]>
 }
 
-func ExampleZonefile_Domain() {
+func ExampleEntry_Domain() {
 	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))
 	fmt.Printf("%q\n", entry.Domain())
 	entry, _ = zonefile.ParseEntry([]byte(" IN A 4.3.2.1"))
@@ -167,7 +167,7 @@ func ExampleZonefile_Domain() {
 	// ""
 }
 
-func ExampleZonefile_Class() {
+func ExampleEntry_Class() {
 	entry, _ := zonefile.ParseEntry([]byte("irc A 1.2.3.4"))
 	fmt.Printf("%q\n", entry.Class())
 	entry, _ = zonefile.ParseEntry([]byte("irc IN A 4.3.2.1"))
@@ -176,7 +176,7 @@ func ExampleZonefile_Class() {
 	// "IN"
 }
 
-func ExampleZonefile_Type() {
+func ExampleEntry_Type() {
 	entry, _ := zonefile.ParseEntry([]byte("irc A 1.2.3.4"))
 	fmt.Printf("%q\n", entry.Type())
 	entry, _ = zonefile.ParseEntry([]byte("irc AAAA ::1"))
@@ -185,7 +185,7 @@ func ExampleZonefile_Type() {
 	// "AAAA"
 }
 
-func ExampleZonefile_TTL() {
+func ExampleEntry_TTL() {
 	entry, _ := zonefile.ParseEntry([]byte("irc A 1.2.3.4"))
 	fmt.Printf("%v\n", entry.TTL() == nil)
 	entry, _ = zonefile.ParseEntry([]byte("irc 12 A 1.2.3.4"))
@@ -194,7 +194,7 @@ func ExampleZonefile_TTL() {
 	// 12
 }
 
-func ExampleZonefile_SetDomain() {
+func ExampleEntry_SetDomain() {
 	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))
 	fmt.Println(entry)
 	entry.SetDomain([]byte(""))
