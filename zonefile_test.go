@@ -103,7 +103,7 @@ func ExampleParseEntry() {
 	// Output: <Entry dom="" ttl="" cls="IN" typ="MX" ["100" "alpha.example.com."]>
 }
 
-func ExampleZonefile_New() {
+func ExampleNew() {
 	z := zonefile.New()
 	z.AddA("", "3.2.3.2")
 	z.AddA("www", "1.2.3.4")
