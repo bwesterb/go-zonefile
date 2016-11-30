@@ -167,6 +167,33 @@ func ExampleZonefile_Domain() {
 	// ""
 }
 
+func ExampleZonefile_Class() {
+	entry, _ := zonefile.ParseEntry([]byte("irc A 1.2.3.4"))
+	fmt.Printf("%q\n", entry.Class())
+	entry, _ = zonefile.ParseEntry([]byte("irc IN A 4.3.2.1"))
+	fmt.Printf("%q\n", entry.Class())
+	// Output: ""
+	// "IN"
+}
+
+func ExampleZonefile_Type() {
+	entry, _ := zonefile.ParseEntry([]byte("irc A 1.2.3.4"))
+	fmt.Printf("%q\n", entry.Type())
+	entry, _ = zonefile.ParseEntry([]byte("irc AAAA ::1"))
+	fmt.Printf("%q\n", entry.Type())
+	// Output: "A"
+	// "AAAA"
+}
+
+func ExampleZonefile_TTL() {
+	entry, _ := zonefile.ParseEntry([]byte("irc A 1.2.3.4"))
+	fmt.Printf("%v\n", entry.TTL() == nil)
+	entry, _ = zonefile.ParseEntry([]byte("irc 12 A 1.2.3.4"))
+	fmt.Printf("%v\n", *entry.TTL())
+	// Output: true
+	// 12
+}
+
 func ExampleZonefile_SetDomain() {
 	entry, _ := zonefile.ParseEntry([]byte("irc IN A 1.2.3.4"))
 	fmt.Println(entry)
