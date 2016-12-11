@@ -690,7 +690,7 @@ var dns_types = []string{
 	"NINFO", "RKEY", "TALINK", "CDS", "CDNSKEY", "OPENPGPKEY", "CSYNC", "SPF",
 	"UINFO", "UID", "GID", "UNSPEC", "NID", "L32", "L64", "LP", "EUI48",
 	"EUI64", "TKEY", "TSIG", "IXFR", "AXFR", "MAILB", "MAILA", "URI", "CAA",
-	"AVC", "TA", "DLV"}
+	"AVC", "TA", "DLV", "CAA"}
 var dns_types_lut map[string]bool
 
 func init() {
