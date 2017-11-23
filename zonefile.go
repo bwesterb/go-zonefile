@@ -1,6 +1,6 @@
 //go:generate stringer -type=tokenType
-// Parse DNS masterfiles a.k.a. zonefiles.  See the Load function.
 
+// Parse DNS masterfiles a.k.a. zonefiles.  See the Load function.
 package zonefile
 
 import (
