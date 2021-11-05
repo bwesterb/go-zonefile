@@ -1,6 +1,6 @@
 //go:generate stringer -type=tokenType
 
-// Parse DNS masterfiles a.k.a. zonefiles.  See the Load function.
+// Package zonefile parses DNS masterfiles a.k.a. zonefiles.  See the Load function.
 package zonefile
 
 import (
@@ -15,17 +15,18 @@ import (
 // API
 //
 
-// Represents a DNS masterfile a.k.a. a zonefile
+// Zonefile represents a DNS masterfile a.k.a. a zonefile, accumulating entries and suffixes
 type Zonefile struct {
 	entries []Entry
 	suffix  []token
 }
 
+// String stringifies the zonefile and returns the entry name
 func (z Zonefile) String() string {
 	return fmt.Sprintf("<Zonefile %v>", z.entries)
 }
 
-// Represents an entry in the zonefile
+// Entry represents an entry in the zonefile
 type Entry entry
 
 // For a control entry, returns its command (e.g. $TTL, $ORIGIN, ...)
@@ -88,7 +89,7 @@ func (e Entry) TTL() *int {
 	return &i
 }
 
-// The values specified for the entry
+// Values provides the configuration items specified for the entry
 func (e Entry) Values() (ret [][]byte) {
 	is := e.find(useValue)
 	for i := 0; i < len(is); i++ {

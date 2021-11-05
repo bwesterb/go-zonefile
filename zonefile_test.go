@@ -3,7 +3,7 @@ package zonefile_test
 import (
 	"bytes"
 	"fmt"
-	"github.com/bwesterb/go-zonefile"
+	"github.com/palladiate/go-zonefile"
 	"testing"
 )
 

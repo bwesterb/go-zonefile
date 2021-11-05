@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/bwesterb/go-zonefile"
+	"github.com/palladiate/go-zonefile"
 	"io/ioutil"
 	"os"
 	"strconv"
