@@ -623,13 +623,13 @@ func (t *token) SetValue(v []byte) {
 		// XXX replace non-printable characters (even though the rfc
 		//     would allow them).
 		tmp := bytes.Replace(v, []byte("\\"), []byte("\\\\"), -1)
-		tmp = bytes.Replace(v, []byte("\""), []byte("\\\""), -1)
+		tmp = bytes.Replace(tmp, []byte("\""), []byte("\\\""), -1)
 		t.typ = tokenQuotedItem
 		t.val = []byte("\"" + string(tmp) + "\"")
 		return
 	}
 	tmp := bytes.Replace(v, []byte("\\"), []byte("\\\\"), -1)
-	tmp = bytes.Replace(v, []byte("\""), []byte("\\\""), -1)
+	tmp = bytes.Replace(tmp, []byte("\""), []byte("\\\""), -1)
 	t.typ = tokenItem
 	t.val = tmp
 	return
