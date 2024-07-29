@@ -636,8 +636,9 @@ func (t *token) SetValue(v []byte) {
 }
 
 // Converts the raw data of a token to the bytestring it represents
+//
 // XXX rfc1035 isn't clear about whether e.g. "\a" makes sense;
-//     whether "\." is interpreted allowed in quoted strings; etc
+// whether "\." is interpreted allowed in quoted strings; etc
 func (t token) Value() []byte {
 	var what []byte
 	switch t.typ {
@@ -704,9 +705,7 @@ func init() {
 	}
 }
 
-//
 // Lexer
-//
 type tokenType int
 
 const eof = 0
